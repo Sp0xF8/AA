@@ -87,7 +87,7 @@ rec_gen([], length, [0, 0, 0, 0])
 
 if print_values:
 	for i, password in enumerate(password_list):
-		print(f"{i+1}: {password}")
+		print(f"{i+1} {password}")
 
 print(len(password_list))
 					

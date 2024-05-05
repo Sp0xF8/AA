@@ -10,6 +10,7 @@ def search(pattern, text, result_queue):
 			for j in range(1, len(pattern)):
 				if text[i + j] != pattern[j]:
 					found = False
+					i += j
 					break
 			if found:
 				count += 1
@@ -88,5 +89,8 @@ if __name__ == '__main__':
 	str_counts = str_counts.replace("[", "")
 	str_counts = str_counts.replace("]", "")
 	
+
+	with open("task1_3_output.txt", "w") as f:
+		f.write(str_counts)
 
 	print(str_counts)

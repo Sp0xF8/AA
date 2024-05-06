@@ -89,6 +89,6 @@ if print_values:
 	for i, password in enumerate(password_list):
 		print(f"{i+1} {password}")
 
-print(len(password_list))
+print(f"L = {length}, N = {len(password_list)}")
 					
 

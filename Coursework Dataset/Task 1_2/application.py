@@ -20,6 +20,7 @@ def get_text(path):
 	return data
 
 
+#print all subsrings found
 def printout(lengths, positions, data):
 	print("The longest substring of length", k, "is/are:")
 	for i in range(len(lengths)):
@@ -29,26 +30,76 @@ def printout(lengths, positions, data):
 
 
 
-def longest_substring(text, k):
-	## create a dictionary to store the frequency of each character
-	character_frequency = {}
-	## create a list to be used as a queue
-	queue = []
-	
-	sub_string_lengths = []
-	sub_string_positions = []
-
-	## loop through each character in the text
+def longest_substring(startpos, text, k):
+	## rule for substring: only k elements are allowed to repeat, but they can repeat as many times as possible
  
-	for i in range(len(text)):
-		### check if the character is not in the dictionary
-		if text[i] not in character_frequency:
-			#### create an empty list for the character
-			character_frequency[text[i]] = []
-		
+	
+	##initialize variables
+	lengths = []
+	positions = []
+
+	
+	##iterate through the text
+	for i in range(startpos, len(text)):
+		chars = {}
+
+		for j in range(i, len(text)):
+			##if the character is not in the dictionary, add it
+			if text[j] not in chars:
+				chars[text[j]] = 1
+			else:
+				chars[text[j]] += 1
+
+			
+			## check number of chars that repeat
+			k_count = 0
+			for key in chars:
+				if chars[key] != 1:
+					k_count += 1
 
 
-	return sub_string_lengths, sub_string_positions
+			##if the most recent length is greater than the previous length, remove all previous lengths
+			
+
+			length = j - i + 1
+			
+			if k_count == k:
+				
+				if len(lengths) > 1:
+					
+					prev_length = lengths[-1]
+					if length > prev_length:
+						lengths.clear()
+						positions.clear()
+						lengths.append(length)
+						positions.append(i)
+					elif length == prev_length:
+						lengths.append(length)
+						positions.append(i)
+				else:
+					lengths.append(length)
+					positions.append(i)
+			elif k_count < k:
+				continue
+			else:
+				break
+
+			# if len(lengths) > 1:
+			# 	length_index = len(lengths) - 1
+			# 	prev_length_index = len(lengths) - 2
+
+			# 	if lengths[length_index] < lengths[prev_length_index]:
+			# 		lengths.pop()
+			# 		positions.pop()
+			# 	elif lengths[length_index] > lengths[prev_length_index]:
+			# 		lengths.pop(prev_length_index)
+			# 		positions.pop(prev_length_index)
+
+			
+			
+
+	return lengths, positions
+			
 
 
 
@@ -57,7 +108,9 @@ k = int(input("Enter the value of k: "))
 data = get_text('letters.txt')
 
 
-lengths, positions = longest_substring(data, k)
+lengths, positions = longest_substring(0, data, k)
+
+##print out the longest substring
 
 printout(lengths, positions, data)
 

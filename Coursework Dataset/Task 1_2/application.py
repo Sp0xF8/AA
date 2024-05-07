@@ -5,7 +5,7 @@
 
 
 #																						['j', 'j', 'g', 'i', 'b', 'j', 'i', 'b', 'j', 'e', 'j', 'a', 'i', 'i', 'j', 'c', 'b', 'i', 'j', 'b', 'b', 'f']
-#																						['d', 'd', 'd', 'i', 'a', 'b', 'c', 'a', 'j', 'd', 'g', 'd', 'k', 'd', 'i', 'h', 'i', 'd', 'e', 'f', 'i', 'i']
+#																				['d', 'd', 'd', 'i', 'a', 'b', 'c', 'a', 'j', 'd', 'g', 'd', 'k', 'd', 'i', 'h', 'i', 'd', 'e', 'f', 'i', 'i']
 #																				['d', 'f', 'k', 'c', 'f', 'f', 'j', 'a', 'i', 'e', 'j', 'f', 'f', 'f', 'b', 'g', 'h', 'f', 'j', 'j', 'd', 'd']
 
 #																				['i', 'g', 'd', 'g', 'j', 'b', 'k', 'd', 'g', 'i', 'i', 'g', 'j', 'a', 'j', 'i', 'i', 'g', 'd', 'f', 'd', 'h', 'i', 'g', 'g', 'c', 'g', 'g', 'd']
@@ -20,12 +20,53 @@ def get_text(path):
 	return data
 
 
+def print_freqs(frequencies):
+	freq_list = []
+
+	for i in frequencies:
+		if frequencies[i] == 1:
+			pass
+		else:
+			freq_list.append((i, frequencies[i]))
+
+	return freq_list
+
+def explode_string(data, locations, length):
+	substrings = []
+	for location in locations:
+		c_string = []
+		for i in range(location, location + length):
+			c_string.append(data[i])
+		substrings.append(c_string)
+
+		
+	return substrings
+
+
 #print all subsrings found
-def printout(lengths, positions, data):
-	print("The longest substring of length", k, "is/are:")
-	for i in range(len(lengths)):
-		print(data[positions[i]:positions[i] + lengths[i]])
-		print("Position:", positions[i], "Length:", lengths[i])
+def printout(lengths, positions, frequencies, data):
+
+	initString = str("k=" + str(k) + ", longest substring is " + str(lengths) + ",")
+
+	print(initString, end="")
+
+	substrings = explode_string(data, positions, lengths)
+
+	data_len = len(data)
+
+
+
+	for i in range(len(positions)):
+		if i == 0:
+			print(f" {substrings[i]} with the frequency {print_freqs(frequencies[i])} at position {positions[i]}/{data_len}")
+		else:
+			print(len(initString) * " ", f"{substrings[i]} with the frequency {print_freqs(frequencies[i])} at position {positions[i]}/{data_len}")
+
+
+		# print("Substring:", substrings[i])
+		# print("Position:", positions[i], "Length:", lengths)
+		# print("Frequencies:", list(print_freqs(frequencies[i])))
+
 
 
 
@@ -35,8 +76,9 @@ def longest_substring(startpos, text, k):
  
 	
 	##initialize variables
-	lengths = []
-	positions = []
+	height = 0
+	height_pos = []
+	frequencies = []
 
 	
 	##iterate through the text
@@ -57,48 +99,27 @@ def longest_substring(startpos, text, k):
 				if chars[key] != 1:
 					k_count += 1
 
-
-			##if the most recent length is greater than the previous length, remove all previous lengths
-			
-
 			length = j - i + 1
 			
 			if k_count == k:
+
+				if length > height:
+					height = length
+					height_pos = [i]
+					frequencies.clear()
+					frequencies.append(chars.copy())
+
+				elif length == height:
+					height_pos.append(i)
+					frequencies.append(chars.copy())
 				
-				if len(lengths) > 1:
-					
-					prev_length = lengths[-1]
-					if length > prev_length:
-						lengths.clear()
-						positions.clear()
-						lengths.append(length)
-						positions.append(i)
-					elif length == prev_length:
-						lengths.append(length)
-						positions.append(i)
-				else:
-					lengths.append(length)
-					positions.append(i)
+
 			elif k_count < k:
-				continue
+				pass
 			else:
 				break
 
-			# if len(lengths) > 1:
-			# 	length_index = len(lengths) - 1
-			# 	prev_length_index = len(lengths) - 2
-
-			# 	if lengths[length_index] < lengths[prev_length_index]:
-			# 		lengths.pop()
-			# 		positions.pop()
-			# 	elif lengths[length_index] > lengths[prev_length_index]:
-			# 		lengths.pop(prev_length_index)
-			# 		positions.pop(prev_length_index)
-
-			
-			
-
-	return lengths, positions
+	return height, height_pos, frequencies
 			
 
 
@@ -108,11 +129,10 @@ k = int(input("Enter the value of k: "))
 data = get_text('letters.txt')
 
 
-lengths, positions = longest_substring(0, data, k)
+lengths, positions, frequencies = longest_substring(0, data, k)
 
-##print out the longest substring
 
-printout(lengths, positions, data)
+printout(lengths, positions, frequencies, data)
 
 
 

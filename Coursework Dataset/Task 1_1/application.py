@@ -24,41 +24,6 @@ if length < 4:
 	exit()
 
 
-
-## testing
-# def generate_passwords(length):
-
-# 	password_list = []
-
-
-# 	
-	# for x in range(2):
-	# 	start_type = values[x]
-	# 	for y in range(4):
-	# 		if y != x:
-	# 			second_char = values[y]
-	# 		else:
-	# 			continue
-	# 		for z in range(4):
-	# 			if z != x and z != y:
-	# 				third_char = values[z]
-	# 			else:
-	# 				continue
-	# 			for a in range(4):
-	# 				if a != x and a != y and a != z:
-	# 					fourth_char = values[a]
-	# 				else:
-	# 					continue
-
-	# 				for i in range(len(start_type)):
-	# 					for j in range(len(second_char)):
-	# 						for k in range(len(third_char)):
-	# 							for l in range(len(fourth_char)):
-	# 								password = start_type[i] + second_char[j] + third_char[k] + fourth_char[l]
-	# 								password_list.append(password)
-
-# 	return password_list
-
 password_list = []
 
 
@@ -90,5 +55,3 @@ if print_values:
 		print(f"{i+1} {password}")
 
 print(f"L = {length}, N = {len(password_list)}")
-					
-

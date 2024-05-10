@@ -83,7 +83,16 @@ def search_size(path):
 	print("Length of each part: ", length)
 
 
-	return length
+	return length, text, div
+
+def get_patterns(path):
+	patterns = []
+	with open(path, "r", encoding='utf8') as f:
+		for line in f:
+			patterns.append(line.strip())
+
+	print(patterns)
+	return patterns
 
 
 
@@ -103,73 +112,126 @@ def search(pattern, text, result_queue):
 	result_queue.put((pattern, count))
 
 
-def read_files():
-	with open("task1_3_text.txt", "r", encoding='utf8') as f:
-		text = f.read()
 
-	with open("task1_3_names.txt", "r", encoding='utf8') as f:
-		patterns = f.readlines()
-
-	# remove newline characters
-	patterns = [x.strip() for x in patterns]
-
-	return text, patterns
-
-
-
-
-
-def check_patterns(patterns, text, n):
+def check_patterns(text_path, patterns_path, n):
 	result_queue = mp.Queue()
-	x = 0
-
 	name_counts = {}
 
-	while x < len(patterns):
-		# print("round start")
-		process_list = []
-		if n > (len(patterns) - x):
-			stop = x + (len(patterns) - x)
-		else:
-			stop = x + n
+	length, text, div = search_size(text_path)
+	patterns = get_patterns(patterns_path)
 
-		for i in range(x, stop):
-			# print("pattern: " + patterns[i])
-			p = mp.Process(target=search, args=(patterns[i], text, result_queue))
-			process_list.append(p)
 
-		for p in process_list:
-			p.start()
+	if div != 1:
 
-		for p in process_list:
-			p.join()
+		x = 0
+		while x < len(patterns):
+			loop = 0
+			pos = 0
+			end = length
+			pattern = patterns[x]
+			pattern_length = len(pattern)
 
-		while not result_queue.empty():
-			pattern, count = result_queue.get()
-			name_counts[pattern] = count
+			print("Pattern: ", pattern)
+			while pos < len(text):
+				processes = []
+				if end == len(text):
+					break
+				
 
-		x += n
-	return name_counts
+				l_start = loop +1
+
+				for i in range(n):
+					loop += 1
+					start = pos - (pattern_length - 1)
+					if start < 0:
+						start = 0
+
+					end = pos + length + (pattern_length - 1)
+					if end > len(text):
+						end = len(text)
+					
+					# print("Start: ", start)
+					# print("End: ", end)
+					process = mp.Process(target=search, args=(pattern, text[start:end], result_queue))
+					processes.append(process)
+					print("Qeueing: ", pattern, " Part: ", loop)
+
+					if end == len(text):
+						# print("End of file")
+						break
+
+					pos += length
+
+				
+				for process in processes:
+					process.start()
+
+				for process in processes:
+					process.join()
+
+				while not result_queue.empty():
+					pattern, count = result_queue.get()
+					if pattern not in name_counts:
+						name_counts[pattern] = 0
+					name_counts[pattern] += count
+					print("Received: ", pattern, " Count: ", count, " Part: ", l_start)
+					l_start += 1
+				print("Total for: ", pattern, " is: ", name_counts[pattern])
+			x += 1
+
+		return name_counts
+	else:
+		x = 0
+		while x < len(patterns):
+			processes = []
+
+			if n > (len(patterns) - x):
+				stop = len(patterns)
+			else:
+				stop = x + n
+
+			for i in range(x, stop):
+				pattern = patterns[i]
+				print("Qeueing: ", pattern)
+				process = mp.Process(target=search, args=(pattern, text, result_queue))
+				processes.append(process)
+
+			for process in processes:
+				process.start()
+
+			for process in processes:
+				process.join()
+
+			while not result_queue.empty():
+				pattern, count = result_queue.get()
+				name_counts[pattern] = count
+				print("Received: ", pattern, " Count: ", count)
+			x += n
+		return name_counts
 
 if __name__ == '__main__':
-	# ram = get_Ram()
-	# print(ram)
-	# text, patterns = read_files()
-	# n = check_capacity()
-	# name_counts = check_patterns(patterns, text, n)
-	# l_counts = list(name_counts.items())
-	# str_counts =str(l_counts)
 
-	# #remove brackets
-	# str_counts = str_counts.replace("[", "")
-	# str_counts = str_counts.replace("]", "")
-	
+	# search_base_length, text, div = search_size("task1_3_text.txt")
+	# print("Base Length: ", search_base_length)
 
-	# with open("task1_3_output.txt", "w") as f:
-	# 	f.write(str_counts)
+	name_counts = check_patterns("task1_3_text.txt", "task1_3_names.txt", 4)
+	l_counts = list(name_counts.items())
+	str_counts =str(l_counts)
 
-	# print(str_counts)
+	#remove brackets
+	str_counts = str_counts.replace("[", "")
+	str_counts = str_counts.replace("]", "")
 
-	search_base_length = search_size("task1_3_text.txt")
+	print(str_counts)
 
-	print("Base Length: ", search_base_length)
+	with open("task1_3_output.txt", "w", encoding='utf8') as f:
+		f.write(str_counts)
+
+
+#output
+##('Harry', 3991), ('Ron', 1185), ('Hermione', 1217), ('Hagrid', 168), ('Dumbledore', 588), ('Draco', 62), ('McGonagall', 70), ('Snape', 292), ('Gilderoy', 0), ('Ginny', 122), ('Malfoy', 89), ('Vernon', 50), ('Arthur', 20), ('Molly', 11), ('Sirius', 69), ('Remus', 21), ('Peter', 2), ('Neville', 89), ('Fred', 94), ('George', 77), ('Moody', 30), ('Cho', 13), ('Voldemort', 446), ('Bellatrix', 98), ('Luna', 140)
+##('Harry', 3991), ('Ron', 1185), ('Hermione', 1217), ('Hagrid', 168), ('Dumbledore', 588), ('Draco', 62), ('McGonagall', 70), ('Snape', 292), ('Gilderoy', 0), ('Ginny', 122), ('Malfoy', 89), ('Vernon', 50), ('Arthur', 20), ('Molly', 11), ('Sirius', 69), ('Remus', 21), ('Peter', 2), ('Neville', 89), ('Fred', 94), ('George', 77), ('Moody', 30), ('Cho', 13), ('Voldemort', 446), ('Bellatrix', 98), ('Luna', 140)
+##('Harry', 3991), ('Ron', 1185), ('Hermione', 1217), ('Hagrid', 168), ('Dumbledore', 588), ('Draco', 62), ('McGonagall', 70), ('Snape', 292), ('Gilderoy', 0), ('Ginny', 122), ('Malfoy', 89), ('Vernon', 50), ('Arthur', 20), ('Molly', 11), ('Sirius', 69), ('Remus', 21), ('Peter', 2), ('Neville', 89), ('Fred', 94), ('George', 77), ('Moody', 30), ('Cho', 13), ('Voldemort', 446), ('Bellatrix', 98), ('Luna', 140)
+
+##expected output
+##('Harry', 3991), ('Ron', 1185), ('Hermione', 1217), ('Hagrid', 168), ('Dumbledore', 588), ('Draco', 62), ('McGonagall', 70), ('Snape', 292), ('Gilderoy', 0), ('Ginny', 122), ('Malfoy', 89), ('Vernon', 50), ('Arthur', 20), ('Molly', 11), ('Sirius', 69), ('Remus', 21), ('Peter', 2), ('Neville', 89), ('Fred', 94), ('George', 77), ('Moody', 30), ('Cho', 13), ('Voldemort', 446), ('Bellatrix', 98), ('Luna', 140)

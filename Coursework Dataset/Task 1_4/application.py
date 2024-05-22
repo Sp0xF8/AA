@@ -230,9 +230,7 @@ def find_shortest_path():
 	try:
 
 		while True:
-			
 			departure = input(formatter.BLUE  +  " "*5 +  "Enter the departure station: " + formatter.GREEN + formatter.BOLD).strip().lower()
-
 			if validate_staton(departure, vertices):
 				print(formatter.RESET + formatter.GREEN + "Station " + formatter.YELLOW + departure.title() + formatter.GREEN + " found in the network" + formatter.RESET)
 				break
@@ -251,6 +249,7 @@ def find_shortest_path():
 
 		print(formatter.GREEN + "The total cost is " + formatter.YELLOW + formatter.BOLD + str(shortest_path) + formatter.RESET + formatter.GREEN + " with the following route " + formatter.YELLOW + formatter.BOLD + str(path) + formatter.RESET)
 		input(formatter.RESET + formatter.GREEN + "Press enter to continue" + formatter.RESET)
+
 	except KeyboardInterrupt:
 		return
 

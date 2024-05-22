@@ -1,11 +1,14 @@
 import multiprocessing as mp
 import os, sys
 
-def get_Ram():
+def get_Ram(verbose):
 	proc = os.popen('wmic memorychip get capacity')
 	ram = proc.readlines()
 	proc.close()
 
+	if verbose:
+		print("Entire RAM lookup:")
+		print(ram)
 
 	## for each line in the output
 	total_ram = 0
@@ -41,7 +44,7 @@ def check_capacity():
 
 def get_params(path, verbose, force=None):
 
-	ram = get_Ram()
+	ram = get_Ram(verbose)
 	n = check_capacity()
 
 	

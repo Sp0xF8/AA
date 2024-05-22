@@ -100,18 +100,50 @@ def get_patterns(path):
 	print(patterns)
 	return patterns
 
-def search(pattern, text, result_queue):
+
+def calc_lps(pattern):
+	pattern_length = len(pattern)
+	lps = [0] * pattern_length
+
+	i = 0
+	j = 1
+	while lps[pattern_length - 1] == None:
+		if pattern[i] == pattern[j]:
+			lps[j] = i + 1
+			i += 1
+			j += 1
+		else:
+			if i == 0:
+				lps[j] = 0
+				j += 1
+			else:
+				i = lps[i - 1]
+	
+	return lps
+
+def kpm(pattern, text, result_queue):
 	count = 0
-	for i in range(len(text) - len(pattern) + 1):
-		if text[i] == pattern[0]:
-			found = True
-			for j in range(1, len(pattern)):
-				if text[i + j] != pattern[j]:
-					found = False
-					i += j
-					break
-			if found:
+
+	pattern_length = len(pattern)
+	text_length = len(text)
+
+	lps = calc_lps(pattern)
+
+	i = 0
+	j = 0
+
+	while i < text_length:
+		if pattern[j] == text[i]:
+			i += 1
+			j += 1
+			if j == pattern_length:
 				count += 1
+				j = lps[j - 1]
+		else:
+			if j == 0:
+				i += 1
+			else:
+				j = lps[j - 1]
 	result_queue.put((pattern, count))
 
 def check_patterns(text_path, patterns_path, verbose=False, force=None):
@@ -158,7 +190,7 @@ def check_patterns(text_path, patterns_path, verbose=False, force=None):
 						# print("Start: ", start)
 						# print("End: ", end)
 						print("Qeueing: ", pattern, " Part: ", loop)
-					process = mp.Process(target=search, args=(pattern, text[start:end], result_queue))
+					process = mp.Process(target=kpm, args=(pattern, text[start:end], result_queue))
 					processes.append(process)
 
 					if end == len(text):
@@ -201,7 +233,7 @@ def check_patterns(text_path, patterns_path, verbose=False, force=None):
 			for i in range(x, stop):
 				pattern = patterns[i]
 				print("Qeueing: ", pattern)
-				process = mp.Process(target=search, args=(pattern, text, result_queue))
+				process = mp.Process(target=kpm, args=(pattern, text, result_queue))
 				processes.append(process)
 
 			for process in processes:
@@ -222,7 +254,7 @@ if __name__ == '__main__':
 	# search_base_length, text, div = search_size("task1_3_text.txt")
 	# print("Base Length: ", search_base_length)
 
-	name_counts = check_patterns("task1_3_text.txt", "task1_3_names.txt", verbose=True, force=2)
+	name_counts = check_patterns("task1_3_text.txt", "task1_3_names.txt", verbose=True)
 	l_counts = list(name_counts.items())
 	str_counts =str(l_counts)
 
@@ -236,7 +268,9 @@ if __name__ == '__main__':
 		f.write(str_counts)
 
 
-#output
+#naieve output
+##('Harry', 3991), ('Ron', 1185), ('Hermione', 1217), ('Hagrid', 168), ('Dumbledore', 588), ('Draco', 62), ('McGonagall', 70), ('Snape', 292), ('Gilderoy', 0), ('Ginny', 122), ('Malfoy', 89), ('Vernon', 50), ('Arthur', 20), ('Molly', 11), ('Sirius', 69), ('Remus', 21), ('Peter', 2), ('Neville', 89), ('Fred', 94), ('George', 77), ('Moody', 30), ('Cho', 13), ('Voldemort', 446), ('Bellatrix', 98), ('Luna', 140)
+#kpm
 ##('Harry', 3991), ('Ron', 1185), ('Hermione', 1217), ('Hagrid', 168), ('Dumbledore', 588), ('Draco', 62), ('McGonagall', 70), ('Snape', 292), ('Gilderoy', 0), ('Ginny', 122), ('Malfoy', 89), ('Vernon', 50), ('Arthur', 20), ('Molly', 11), ('Sirius', 69), ('Remus', 21), ('Peter', 2), ('Neville', 89), ('Fred', 94), ('George', 77), ('Moody', 30), ('Cho', 13), ('Voldemort', 446), ('Bellatrix', 98), ('Luna', 140)
 
 ##expected output
